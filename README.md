@@ -1,68 +1,70 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`c3`](https://developers.cloudflare.com/pages/get-started/c3).
+# Cloudflare Function Demos
 
-## Getting Started
+A collection of hands-on demos exploring Cloudflare security and developer features. Built with Next.js and TypeScript, with Cloudflare Pages as the original deployment target.
 
-First, run the development server:
+## Demos
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+| Demo | Route | What it shows |
+| --- | --- | --- |
+| WAF actions | `/action-block`, `/action-managedchallenge`, `/action-jschallenge`, `/action-interactivechallenge` | Pages for testing different WAF challenge and block experiences |
+| Rate limiting | `/RL2layer` | Rate-limiting demonstration page |
+| Waiting Room | `/waiting-room`, `/waiting-room-json` | Waiting Room UI and JSON response endpoint |
+| HMAC | `/hmac`, `/hmac-with-workers` | Signed-path generation and verification examples |
+| Turnstile + D1 | `/` and `/api/submit` | Turnstile verification before storing a submitted name in D1 |
+| R2 upload | `/` and `/api/upload` | File upload to R2 using its S3-compatible API |
+| Session revocation | `/api/revoke-session` | Endpoint for a session-revocation demonstration |
+
+Some demos require matching Cloudflare rules, services, or credentials configured outside this repository. The pages alone do not enable the corresponding Cloudflare product behavior.
+
+## Stack
+
+- Next.js 14, React 18, TypeScript
+- Cloudflare Pages and Wrangler
+- Cloudflare Turnstile, D1, R2
+- AWS SDK for JavaScript (R2 S3-compatible API)
+- Drizzle ORM
+
+## Project layout
+
+```text
+src/app/          Demo pages and API routes
+src/db/           D1 schema
+src/lib/hmac.ts   HMAC signing and verification helpers
+scripts/          Pages build helper
+wrangler.toml     Cloudflare Pages configuration and bindings
+.dev.vars.example Local secret variable template
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Run locally
 
-## Cloudflare integration
+Requirements: Node.js, npm, and access to the Cloudflare resources needed for the demos you want to test.
 
-Besides the `dev` script mentioned above `c3` has added a few extra scripts that allow you to integrate the application with the [Cloudflare Pages](https://pages.cloudflare.com/) environment, these are:
-  - `pages:build` to build the application for Pages using the [`@cloudflare/next-on-pages`](https://github.com/cloudflare/next-on-pages) CLI
-  - `preview` to locally preview your Pages application using the [Wrangler](https://developers.cloudflare.com/workers/wrangler/) CLI
-  - `deploy` to deploy your Pages application using the [Wrangler](https://developers.cloudflare.com/workers/wrangler/) CLI
+```bash
+npm install
+cp .dev.vars.example .dev.vars
+npm run dev
+```
 
-> __Note:__ while the `dev` script is optimal for local development you should preview your Pages application as well (periodically or before deployments) in order to make sure that it can properly work in the Pages environment (for more details see the [`@cloudflare/next-on-pages` recommended workflow](https://github.com/cloudflare/next-on-pages/blob/main/internal-packages/next-dev/README.md#recommended-development-workflow))
+Set your own development credentials in `.dev.vars`. Do not commit that file. The Next.js development server normally runs at `http://localhost:3000`.
 
-### Bindings
+The repository includes a D1 binding named `D1DATABASE` and an R2 bucket name in `wrangler.toml`. Replace the example project's Cloudflare resource IDs and names with your own before deploying. Create the D1 `names` table as required by `src/app/api/submit/route.ts`.
 
-Cloudflare [Bindings](https://developers.cloudflare.com/pages/functions/bindings/) are what allows you to interact with resources available in the Cloudflare Platform.
+For a Pages-compatible build and local preview:
 
-You can use bindings during development, when previewing locally your application and of course in the deployed application:
+```bash
+npm run preview
+```
 
-- To use bindings in dev mode you need to define them in the `next.config.js` file under `setupDevBindings`, this mode uses the `next-dev` `@cloudflare/next-on-pages` submodule. For more details see its [documentation](https://github.com/cloudflare/next-on-pages/blob/05b6256/internal-packages/next-dev/README.md).
+To deploy using the original workflow:
 
-- To use bindings in the preview mode you need to add them to the `pages:preview` script accordingly to the `wrangler pages dev` command. For more details see its [documentation](https://developers.cloudflare.com/workers/wrangler/commands/#dev-1) or the [Pages Bindings documentation](https://developers.cloudflare.com/pages/functions/bindings/).
+```bash
+npm run deploy
+```
 
-- To use bindings in the deployed application you will need to configure them in the Cloudflare [dashboard](https://dash.cloudflare.com/). For more details see the  [Pages Bindings documentation](https://developers.cloudflare.com/pages/functions/bindings/).
+Cloudflare authentication, project setup, production secrets, D1 bindings, and R2 resources must be configured separately. The commands above describe the original workflow; successful deployment has **not** been reverified against current Cloudflare tooling.
 
-#### KV Example
+## Security and project status
 
-`c3` has added for you an example showing how you can use a KV binding.
+This is a demonstration project, **not a production-ready application**. Before exposing it publicly, add authentication and server-side file validation/size limits to the upload endpoint, review error responses, and protect any signing endpoints that should not be publicly accessible. Review Cloudflare rules and rate limits for each demo.
 
-In order to enable the example:
-- Search for javascript/typescript lines containing the following comment:
-  ```ts
-  // KV Example:
-  ```
-  and uncomment the commented lines below it.
-- Do the same in the `wrangler.toml` file, where
-  the comment is:
-  ```
-  # KV Example:
-  ```
-- If you're using TypeScript run the `cf-typegen` script to update the `env.d.ts` file:
-  ```bash
-  npm run cf-typegen
-  # or
-  yarn cf-typegen
-  # or
-  pnpm cf-typegen
-  # or
-  bun cf-typegen
-  ```
-
-After doing this you can run the `dev` or `preview` script and visit the `/api/hello` route to see the example in action.
-
-Finally, if you also want to see the example work in the deployed application make sure to add a `MY_KV_NAMESPACE` binding to your Pages application in its [dashboard kv bindings settings section](https://dash.cloudflare.com/?to=/:account/pages/view/:pages-project/settings/functions#kv_namespace_bindings_section). After having configured it make sure to re-deploy your application.
+The original Next.js 14 / `@cloudflare/next-on-pages` implementation is preserved for reference. The live deployment is pending revalidation. See `PUBLIC_RELEASE_NOTES.md` for the earlier public-release cleanup notes. Never reuse previously exposed credentials.
