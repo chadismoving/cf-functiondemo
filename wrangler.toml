@@ -1,0 +1,16 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "cf-functions"
+compatibility_date = "2024-09-25"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".vercel/output/static"
+
+[vars]
+R2_BUCKET_NAME = "cf-functions"
+R2_ACCOUNT_ID = "c4173e693176ae8c37ff3058b7f2ea2f"
+HMAC_TOKEN_TTL = "60"
+# D1_DATABASE = "D1Database"
+
+[[d1_databases]]
+binding = "D1DATABASE"
+database_name = "cf-funcions"
+database_id = "59a823c1-636c-4571-b820-358aedb1cb8b"

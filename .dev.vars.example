@@ -1,0 +1,4 @@
+R2_ACCESS_KEY_ID=replace-me
+R2_SECRET_ACCESS_KEY=replace-me
+TURNSTILE_SECRET_KEY=replace-me
+HMAC_SECRET=replace-with-long-random-value
